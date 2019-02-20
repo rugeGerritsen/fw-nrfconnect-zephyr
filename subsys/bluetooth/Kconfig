@@ -178,7 +178,7 @@ config BT_HAS_HCI_VS
 	bool
 	help
 	  This option can be enabled by an external library if it
-	  supports the Zephyr HCI Vendor-Specific Commands.
+	  supports the Zephyr HCI Vendor-Specific Commands and Events.
 
 config BT_HCI_VS
 	bool "Zephyr HCI Vendor-Specific Commands"
