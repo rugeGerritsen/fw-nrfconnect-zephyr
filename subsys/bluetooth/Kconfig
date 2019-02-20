@@ -174,7 +174,7 @@ source "subsys/bluetooth/host/Kconfig"
 source "subsys/bluetooth/controller/Kconfig"
 source "subsys/bluetooth/shell/Kconfig"
 
-config BT_LL_HAS_VS_COMMANDS
+config BT_HAS_HCI_VS
 	bool
 	help
 	  This option can be enabled by an external library if it
@@ -182,7 +182,7 @@ config BT_LL_HAS_VS_COMMANDS
 
 config BT_HCI_VS
 	bool "Zephyr HCI Vendor-Specific Commands"
-	depends on BT_LL_HAS_VS_COMMANDS
+        depends on BT_HAS_HCI_VS
 	default y
 	help
 	  Enable support for the Zephyr HCI Vendor-Specific Commands in the
