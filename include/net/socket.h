@@ -66,13 +66,6 @@ typedef struct zsock_fd_set {
 #define ZSOCK_SHUT_WR 1
 #define ZSOCK_SHUT_RDWR 2
 
-/** Protocol level for socket. */
-#define SOL_SOCKET 0xffff
-
-#define ZSOCK_SO_ERROR 4
-#define ZSOCK_SO_RCVTIMEO 20
-#define ZSOCK_SO_BINDTODEVICE 25
-
 /** Protocol level for TLS.
  *  Here, the same socket protocol level for TLS as in Linux was used.
  */
@@ -202,6 +195,12 @@ int zsock_setsockopt(int sock, int level, int optname,
 
 int zsock_gethostname(char *buf, size_t len);
 
+static inline char *zsock_inet_ntop(sa_family_t family, const void *src,
+				    char *dst, size_t size)
+{
+	return net_addr_ntop(family, src, dst, size);
+}
+
 __syscall int zsock_inet_pton(sa_family_t family, const char *src, void *dst);
 
 __syscall int z_zsock_getaddrinfo_internal(const char *host,
@@ -217,6 +216,16 @@ static inline void zsock_freeaddrinfo(struct zsock_addrinfo *ai)
 {
 	free(ai);
 }
+
+#define NI_NUMERICHOST 1
+#define NI_NUMERICSERV 2
+#define NI_NOFQDN 4
+#define NI_NAMEREQD 8
+#define NI_DGRAM 16
+
+int zsock_getnameinfo(const struct sockaddr *addr, socklen_t addrlen,
+		      char *host, socklen_t hostlen,
+		      char *serv, socklen_t servlen, int flags);
 
 #if defined(CONFIG_NET_SOCKETS_POSIX_NAMES)
 
@@ -344,6 +353,14 @@ static inline void freeaddrinfo(struct zsock_addrinfo *ai)
 	zsock_freeaddrinfo(ai);
 }
 
+static inline int getnameinfo(const struct sockaddr *addr, socklen_t addrlen,
+			      char *host, socklen_t hostlen,
+			      char *serv, socklen_t servlen, int flags)
+{
+	return zsock_getnameinfo(addr, addrlen, host, hostlen,
+				 serv, servlen, flags);
+}
+
 #define addrinfo zsock_addrinfo
 
 static inline int gethostname(char *buf, size_t len)
@@ -400,14 +417,10 @@ static inline int inet_pton(sa_family_t family, const char *src, void *dst)
 #define SHUT_WR ZSOCK_SHUT_WR
 #define SHUT_RDWR ZSOCK_SHUT_RDWR
 
-#define SO_ERROR ZSOCK_SO_ERROR
-#define SO_RCVTIMEO ZSOCK_SO_RCVTIMEO
-#define SO_BINDTODEVICE ZSOCK_SO_BINDTODEVICE
-
 static inline char *inet_ntop(sa_family_t family, const void *src, char *dst,
 			      size_t size)
 {
-	return net_addr_ntop(family, src, dst, size);
+	return zsock_inet_ntop(family, src, dst, size);
 }
 
 #define EAI_BADFLAGS DNS_EAI_BADFLAGS
@@ -419,6 +432,27 @@ static inline char *inet_ntop(sa_family_t family, const void *src, char *dst,
 #define EAI_SYSTEM DNS_EAI_SYSTEM
 #define EAI_SERVICE DNS_EAI_SERVICE
 #endif /* defined(CONFIG_NET_SOCKETS_POSIX_NAMES) */
+
+#define SOL_SOCKET 1
+
+/* Socket options for SOL_SOCKET level */
+#define SO_REUSEADDR 2
+#define SO_ERROR 4
+#define SO_RCVTIMEO 20
+#define SO_BINDTODEVICE 25
+
+/* Socket options for IPPROTO_TCP level */
+#define TCP_NODELAY 1
+
+/* Socket options for IPPROTO_IPV6 level */
+#define IPV6_V6ONLY 26
+
+/* Interface description structure */
+#define IFNAMSIZ 64
+
+struct ifreq {
+    char ifr_name[IFNAMSIZ]; /* Interface name */
+};
 
 #ifdef __cplusplus
 }

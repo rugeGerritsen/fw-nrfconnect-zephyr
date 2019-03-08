@@ -13,11 +13,10 @@ config  SOC_SERIES_NRF52X
 	select SOC_FAMILY_NRF
 	select NRF_RTC_TIMER
 	select CLOCK_CONTROL
-	select SYS_POWER_DEEP_SLEEP_STATES_SUPPORTED
-	select SYS_POWER_STATE_DEEP_SLEEP_SUPPORTED
+	select HAS_STATE_DEEP_SLEEP_1
 	select XIP
 	select HAS_CMSIS
 	select HAS_NRFX
 	select HAS_SEGGER_RTT
 	help
-         Enable support for NRF52 MCU series
+	 Enable support for NRF52 MCU series
