@@ -38,7 +38,7 @@ int settings_fcb_src(struct settings_fcb *cf)
 	cf->cf_fcb.f_scratch_cnt = 1;
 
 	while (1) {
-		rc = fcb_init(CONFIG_SETTINGS_FCB_FLASH_AREA, &cf->cf_fcb);
+		rc = fcb_init(DT_FLASH_AREA_STORAGE_ID, &cf->cf_fcb);
 		if (rc) {
 			return -EINVAL;
 		}
@@ -249,7 +249,7 @@ static int settings_fcb_save(struct settings_store *cs, const char *name,
 		return -EINVAL;
 	}
 
-	wbs = flash_area_align(cf->cf_fcb.fap);
+	wbs = cf->cf_fcb.f_align;
 	len = settings_line_len_calc(name, val_len);
 
 	for (i = 0; i < cf->cf_fcb.f_sector_cnt - 1; i++) {
