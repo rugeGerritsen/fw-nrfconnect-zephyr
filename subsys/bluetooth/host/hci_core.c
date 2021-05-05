@@ -1043,6 +1043,34 @@ static void le_conn_complete_adv_timeout(void)
 
 static void enh_conn_complete(struct bt_hci_evt_le_enh_conn_complete *evt)
 {
+#if (CONFIG_BT_ID_MAX > 1) && (CONFIG_BT_EXT_ADV_MAX_ADV_SET > 1)
+	if (IS_ENABLED(CONFIG_BT_PERIPHERAL) &&
+		evt->role == BT_HCI_ROLE_SLAVE &&
+		(IS_ENABLED(CONFIG_BT_EXT_ADV) &&
+				BT_FEAT_LE_EXT_ADV(bt_dev.le.features))) {
+
+		if (bt_dev.conn_complete_received) {
+			/* The controller is responsible for not forwarding
+			 * a new enhanced connection complete event before
+			 * the corresponding advertising set termined event
+			 * is raised. */
+			BT_WARN("New event before cached event is processed");
+		}
+
+		/* Cache the connection complete event. Process it later.
+		 * See bt_dev.cached_conn_complete.  */
+		memcpy(&bt_dev.cached_conn_complete,
+			evt,
+			sizeof(struct bt_hci_evt_le_enh_conn_complete));
+		bt_dev.conn_complete_received = true;
+		return;
+	}
+#endif
+	bt_hci_enh_conn_complete(evt);
+}
+
+void bt_hci_enh_conn_complete(struct bt_hci_evt_le_enh_conn_complete *evt)
+{
 	uint16_t handle = sys_le16_to_cpu(evt->handle);
 	bt_addr_le_t peer_addr, id_addr;
 	struct bt_conn *conn;

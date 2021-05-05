@@ -1553,6 +1553,16 @@ void bt_hci_le_adv_set_terminated(struct net_buf *buf)
 	adv = bt_adv_lookup_handle(evt->adv_handle);
 	conn_handle = sys_le16_to_cpu(evt->conn_handle);
 
+#if (CONFIG_BT_ID_MAX > 1) && (CONFIG_BT_EXT_ADV_MAX_ADV_SET > 1)
+	bt_dev.adv_conn_id = adv->id;
+	if (bt_dev.conn_complete_received) {
+		/* Process the cached connection complete event, now that the
+		 * corresponding advertising set is known. */
+		bt_hci_enh_conn_complete(&bt_dev.cached_conn_complete);
+		bt_dev.conn_complete_received = false;
+	}
+#endif
+
 	BT_DBG("status 0x%02x adv_handle %u conn_handle 0x%02x num %u",
 	       evt->status, evt->adv_handle, conn_handle,
 	       evt->num_completed_ext_adv_evts);
