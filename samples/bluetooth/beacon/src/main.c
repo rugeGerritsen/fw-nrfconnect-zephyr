@@ -51,16 +51,43 @@ static void bt_ready(int err)
 		return;
 	}
 
+	static bt_addr_le_t id;
+	id.type = BT_ADDR_LE_RANDOM;
+	id.a.val[0] = 0x3;
+	id.a.val[5] = 0xc0; /* Random static address */
+	int id_entry = bt_id_create(&id, NULL);
+	printk("Created id, %d\n", id_entry);
+
 	printk("Bluetooth initialized\n");
 
 	/* Start advertising */
-	err = bt_le_adv_start(BT_LE_ADV_NCONN_IDENTITY, ad, ARRAY_SIZE(ad),
-			      sd, ARRAY_SIZE(sd));
+	struct bt_le_ext_adv * adv;
+
+	/* Connectable */
+	struct bt_le_adv_param adv_param = BT_LE_ADV_PARAM_INIT(BT_LE_ADV_OPT_CONNECTABLE | BT_LE_ADV_OPT_USE_NAME,
+								BT_GAP_ADV_FAST_INT_MIN_2,
+							        BT_GAP_ADV_FAST_INT_MAX_2, NULL);
+	adv_param.id = id_entry;
+	err = bt_le_ext_adv_create(&adv_param, NULL, &adv);
 	if (err) {
-		printk("Advertising failed to start (err %d)\n", err);
+		printk("Failed to create advertising set (err %d)\n", err);
 		return;
 	}
+	printk("Advertising set created\n");
 
+//	/* Start extended advertising, times out  */
+//	err = bt_le_ext_adv_start(adv, BT_LE_EXT_ADV_START_PARAM(10, 10));
+//	if (err) {
+//		printk("Failed to start extended advertising (err %d)\n", err);
+//		return;
+//	}
+
+	/* Start extended advertising, never times */
+	err = bt_le_ext_adv_start(adv, BT_LE_EXT_ADV_START_PARAM(0, 0));
+	if (err) {
+		printk("Failed to start extended advertising (err %d)\n", err);
+		return;
+	}
 
 	/* For connectable advertising you would use
 	 * bt_le_oob_get_local().  For non-connectable non-identity

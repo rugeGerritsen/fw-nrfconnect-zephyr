@@ -884,6 +884,7 @@ static struct bt_conn *find_pending_connect(uint8_t role, bt_addr_le_t *peer_add
 	}
 
 	if (IS_ENABLED(CONFIG_BT_PERIPHERAL) && role == BT_HCI_ROLE_SLAVE) {
+		BT_ERR("Looking up peer with ID %d", bt_dev.adv_conn_id);
 		conn = bt_conn_lookup_state_le(bt_dev.adv_conn_id, peer_addr,
 					       BT_CONN_CONNECT_DIR_ADV);
 		if (!conn) {
@@ -1043,6 +1044,7 @@ static void le_conn_complete_adv_timeout(void)
 
 static void enh_conn_complete(struct bt_hci_evt_le_enh_conn_complete *evt)
 {
+	BT_ERR("Enhanced conn complete");
 #if (CONFIG_BT_ID_MAX > 1) && (CONFIG_BT_EXT_ADV_MAX_ADV_SET > 1)
 	if (IS_ENABLED(CONFIG_BT_PERIPHERAL) &&
 		evt->role == BT_HCI_ROLE_SLAVE &&
@@ -1056,6 +1058,8 @@ static void enh_conn_complete(struct bt_hci_evt_le_enh_conn_complete *evt)
 			 * is raised. */
 			BT_WARN("New event before cached event is processed");
 		}
+
+		BT_ERR("Caching event conn complete");
 
 		/* Cache the connection complete event. Process it later.
 		 * See bt_dev.cached_conn_complete.  */
@@ -1071,11 +1075,12 @@ static void enh_conn_complete(struct bt_hci_evt_le_enh_conn_complete *evt)
 
 void bt_hci_enh_conn_complete(struct bt_hci_evt_le_enh_conn_complete *evt)
 {
+	BT_ERR("Processing conn complete", evt->status);
 	uint16_t handle = sys_le16_to_cpu(evt->handle);
 	bt_addr_le_t peer_addr, id_addr;
 	struct bt_conn *conn;
 
-	BT_DBG("status 0x%02x handle %u role %u peer %s peer RPA %s",
+	BT_ERR("status 0x%02x handle %u role %u peer %s peer RPA %s",
 	       evt->status, handle, evt->role, bt_addr_le_str(&evt->peer_addr),
 	       bt_addr_str(&evt->peer_rpa));
 	BT_DBG("local RPA %s", bt_addr_str(&evt->local_rpa));

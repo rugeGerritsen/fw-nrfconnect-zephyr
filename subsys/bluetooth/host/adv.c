@@ -1553,6 +1553,8 @@ void bt_hci_le_adv_set_terminated(struct net_buf *buf)
 	adv = bt_adv_lookup_handle(evt->adv_handle);
 	conn_handle = sys_le16_to_cpu(evt->conn_handle);
 
+	BT_ERR("Adv set Terminated");
+
 #if (CONFIG_BT_ID_MAX > 1) && (CONFIG_BT_EXT_ADV_MAX_ADV_SET > 1)
 	bt_dev.adv_conn_id = adv->id;
 	if (bt_dev.conn_complete_received) {

@@ -1799,7 +1799,7 @@ struct bt_conn *bt_conn_lookup_state_le(uint8_t id, const bt_addr_le_t *peer,
 			bt_conn_unref(conn);
 			continue;
 		}
-
+		BT_ERR("Found conn, state is %d, required %d, id %d", conn->state, state, id);
 		if (!(conn->state == state && conn->id == id)) {
 			bt_conn_unref(conn);
 			continue;
